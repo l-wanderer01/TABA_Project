@@ -177,7 +177,7 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
 
     private void saveImage(byte[] imageData) {
         try {
-            final String DIRECTORY_PATH = "/Users/jaeh/Downloads/socket";
+            final String DIRECTORY_PATH = "/home/ubuntu/userimage";
             String fileName = "image_" + System.currentTimeMillis() + ".jpg";
             FileStorageHandler.saveFile(DIRECTORY_PATH, fileName, imageData);
             System.out.println("이미지 저장 성공: " + DIRECTORY_PATH + "/" + fileName);

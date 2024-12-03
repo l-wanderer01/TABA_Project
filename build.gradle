@@ -19,6 +19,10 @@ configurations {
 	}
 }
 
+jar {
+	enabled = true
+}
+
 repositories {
 	mavenCentral()
 }
@@ -42,10 +46,11 @@ dependencies {
 	implementation 'org.projectlombok:lombok:1.18.20'
 
 	// MySQL 데이터베이스에 연결하기 위한 JDBC 드라이버 추가
-	implementation 'com.mysql:mysql-connector-j'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// runtimeOnly 'com.mysql:mysql-connector-j' // -j
-	implementation 'com.mysql:mysql-connector-java:8.0.38'
+	// runtimeOnly 'com.mysql:mysql-connector-java:8.0.38'
+	// implementation 'com.mysql:mysql-connector-java:8.0.33'
 	// 테스트 코드를 작성하고 실행하기 위한 라이브러리 모음 추가
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
