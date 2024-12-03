@@ -45,7 +45,7 @@ dependencies {
 	implementation 'com.mysql:mysql-connector-j'
 
 	// runtimeOnly 'com.mysql:mysql-connector-j' // -j
-	runtimeOnly 'com.mysql:mysql-connector-java:8.0.38'
+	implementation 'com.mysql:mysql-connector-java:8.0.38'
 	// 테스트 코드를 작성하고 실행하기 위한 라이브러리 모음 추가
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
