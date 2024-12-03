@@ -28,8 +28,8 @@ repositories {
 }
 
 dependencies {
-	// Spring Boot JPA와 관련 의존성도 확인
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// Spring Boot JPA와 관련 의존성도 확인(Database와 관련)
+	// implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	// OAuth2 클라이언트 기능 지원
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	// Spring Security를 사용한 인증 및 권한 관리를 지원
@@ -46,7 +46,7 @@ dependencies {
 	implementation 'org.projectlombok:lombok:1.18.20'
 
 	// MySQL 데이터베이스에 연결하기 위한 JDBC 드라이버 추가
-	runtimeOnly 'com.mysql:mysql-connector-j'
+	// runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// runtimeOnly 'com.mysql:mysql-connector-j' // -j
 	// runtimeOnly 'com.mysql:mysql-connector-java:8.0.38'
