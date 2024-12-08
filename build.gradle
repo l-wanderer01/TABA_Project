@@ -33,7 +33,6 @@ dependencies {
 
 	// 테스트 의존성
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation("org.springframework.security:spring-security-test")
 
 	// 추가적으로 필요 시 활성화할 의존성 (현재 비활성화)
 	// implementation 'org.springframework.boot:spring-boot-starter-security'
