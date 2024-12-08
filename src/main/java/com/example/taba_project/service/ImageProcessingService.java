@@ -1,38 +1,3 @@
-//package com.example.demo.service;
-//
-//import com.example.demo.model.ImageData;
-//import org.springframework.stereotype.Service;
-//
-//import java.io.File;
-//import java.io.FileOutputStream;
-//import java.io.IOException;
-//import java.util.UUID;
-//
-//@Service
-//public class ImageProcessingService {
-//
-//    private static final String IMAGE_DIR = "images/";
-//
-//    public String saveImage(ImageData imageData) throws IOException {
-//        // 저장 디렉토리 생성
-//        File directory = new File(IMAGE_DIR);
-//        if (!directory.exists()) {
-//            directory.mkdirs();
-//        }
-//
-//        // 파일 이름 생성 (UUID)
-//        String fileName = UUID.randomUUID() + ".jpg";
-//        File file = new File(IMAGE_DIR + fileName);
-//
-//        // 이미지 데이터를 파일로 저장
-//        try (FileOutputStream fos = new FileOutputStream(file)) {
-//            fos.write(imageData.getImageData());
-//        }
-//
-//        return file.getAbsolutePath();
-//    }
-//}
-
 package com.example.taba_project.service;
 
 import com.example.taba_project.model.ImageData;
