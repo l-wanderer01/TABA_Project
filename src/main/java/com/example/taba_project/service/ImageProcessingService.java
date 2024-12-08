@@ -12,7 +12,7 @@ import java.util.UUID;
 public class ImageProcessingService {
 
     // 환경 변수 또는 사용자 홈 디렉토리에 저장 디렉토리 설정
-    private static final String IMAGE_DIR = System.getProperty("user.home") + "/userimage/";
+    private static final String IMAGE_DIR = "/home/ubuntu/userimage/";
 
     public String saveImage(ImageData imageData) throws IOException {
         // 이미지 데이터 유효성 검사

@@ -20,8 +20,8 @@ public class ImageController {
     private final FileStorageHandler fileStorageHandler;
     private static final Logger logger = LoggerFactory.getLogger(ImageController.class);
 
-    @Value("${file.storage.directory:/home/ubuntu/userimage}")
-    private String directoryPath;
+    // @Value("${file.storage.directory:/home/ubuntu/userimage}")
+    private String directoryPath = "/home/ubuntu/userimage";
 
     public ImageController(ImageRepository imageRepository, FileStorageHandler fileStorageHandler) {
         this.imageRepository = imageRepository;
