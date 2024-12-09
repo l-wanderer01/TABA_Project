@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 
 public class FileStorageHandler {
 
-    public static void saveFile(String directoryPath, String fileName, byte[] data) throws IOException {
+    public static String saveFile(String directoryPath, String fileName, byte[] data) throws IOException {
         // 디렉토리 경로를 생성
         Path dirPath = Paths.get(directoryPath);
         if (!Files.exists(dirPath)) {
@@ -18,5 +18,6 @@ public class FileStorageHandler {
         Path filePath = Paths.get(directoryPath, fileName);
         Files.write(filePath, data);
         System.out.println("파일 저장 완료: " + filePath.toAbsolutePath());
+        return directoryPath;
     }
 }
