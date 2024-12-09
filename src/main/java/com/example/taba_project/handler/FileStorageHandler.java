@@ -19,6 +19,7 @@ public class FileStorageHandler {
         Path dirPath = Paths.get(directoryPath);
         if (!Files.exists(dirPath)) {
             Files.createDirectories(dirPath); // 디렉토리가 없으면 생성
+            logger.info("디렉토리 생성 : {}", dirPath.toAbsolutePath());
         }
 
         // 파일 경로 생성 및 저장

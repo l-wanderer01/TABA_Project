@@ -1,6 +1,7 @@
 package com.example.taba_project.service;
 
 import com.example.taba_project.model.ImageData;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -12,7 +13,8 @@ import java.util.UUID;
 public class ImageProcessingService {
 
     // 환경 변수 또는 사용자 홈 디렉토리에 저장 디렉토리 설정
-    private static final String IMAGE_DIR = "/home/ubuntu/userimage/";
+    @Value("${file.storage.directory}")
+    private String IMAGE_DIR;
 
     public String saveImage(ImageData imageData) throws IOException {
         // 이미지 데이터 유효성 검사
