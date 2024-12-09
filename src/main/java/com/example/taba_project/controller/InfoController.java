@@ -18,17 +18,27 @@ public class InfoController {
     // 새로운 Info 저장
     @PostMapping
     public String saveInfo(@RequestBody Info info) {
-        System.out.println("Received info: " + info);
+        try {
+            System.out.println("Received info: " + info);
 
-        // DB에 저장
-        infoRepository.save(info);
+            // DB에 저장
+            infoRepository.save(info);
 
-        // 감정 메시지 생성
-        String emotionMessage = generateEmotionMessage(info.getEmotion(), info.getPercentage());
+            // 감정 메시지 생성
+            String emotionMessage = generateEmotionMessage(info.getEmotion(), info.getPercentage());
 
-        // 결과 반환
-        return emotionMessage;
+            // 로그에 출력
+            System.out.println("Generated emotion message: " + emotionMessage);
+
+            // 결과 반환
+            return emotionMessage;
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            return "Error occurred";
+        }
     }
+
 
     private String generateEmotionMessage(String emotion, Double percentage) {
         String message = "";
