@@ -1,6 +1,8 @@
 package com.example.taba_project.handler;
 
-import com.example.taba_project.handler.FileStorageHandler;
+import com.example.taba_project.model.Image;
+import com.example.taba_project.repository.ImageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -14,6 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ImageWebSocketHandler extends TextWebSocketHandler {
+
+    //db에 저장하는 함수 사용위해 의존성 추가
+    @Autowired
+    private ImageRepository imageRepository;
 
     // 세션별 메시지 조합을 위한 맵
     private final ConcurrentHashMap<String, StringBuilder> sessionData = new ConcurrentHashMap<>();
@@ -95,6 +101,16 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
             FileStorageHandler FS = new FileStorageHandler();
             FS.saveFile(directoryPath, fileName, imageData);
             System.out.println("이미지 저장 성공: " + directoryPath + "/" + fileName);
+
+            // URL 데이터베이스 저장
+            String fileUrl = directoryPath + "/" + fileName;
+
+            // DB에 저장할 Image 객체 생성
+            Image image = new Image();
+            image.setUrl(fileUrl);
+            imageRepository.save(image); // DB에 저장
+            System.out.println("이미지 URL 데이터베이스 저장 성공: " + fileUrl);
+
         } catch (Exception e) {
             System.err.println("이미지 저장 실패: " + e.getMessage());
         }
