@@ -1,6 +1,8 @@
 package com.example.taba_project.handler;
 
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,6 +11,8 @@ import java.nio.file.Paths;
 
 @Component
 public class FileStorageHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileStorageHandler.class);
 
     public String saveFile(String directoryPath, String fileName, byte[] data) throws IOException {
         // 디렉토리 경로를 생성
@@ -20,7 +24,7 @@ public class FileStorageHandler {
         // 파일 경로 생성 및 저장
         Path filePath = Paths.get(directoryPath, fileName);
         Files.write(filePath, data);
-        System.out.println("파일 저장 완료: " + filePath.toAbsolutePath());
+        logger.info("파일 저장 완료: {}", filePath.toAbsolutePath());
 
         // 저장된 파일의 절대 경로 반환
         return filePath.toAbsolutePath().toString();
