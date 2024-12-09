@@ -17,9 +17,60 @@ public class InfoController {
 
     // 새로운 Info 저장
     @PostMapping
-    public Info saveInfo(@RequestBody Info info) {
+    public String saveInfo(@RequestBody Info info) {
         System.out.println("Received info: " + info);
-        return infoRepository.save(info);
+
+        // DB에 저장
+        infoRepository.save(info);
+
+        // 감정 메시지 생성
+        String emotionMessage = generateEmotionMessage(info.getEmotion(), info.getPercentage());
+
+        // 결과 반환
+        return emotionMessage;
     }
 
+    private String generateEmotionMessage(String emotion, Double percentage) {
+        String message = "";
+        String intensity = getIntensity(percentage);
+
+        switch (emotion.toLowerCase()) {
+            case "happy":
+                message = "상대가 " + intensity + " 행복해 합니다.";
+                break;
+            case "surprise":
+                message = "상대가 " + intensity + " 놀랐습니다.";
+                break;
+            case "무표정":
+                message = "상대가 " + intensity + " 무표정입니다.";
+                break;
+            case "gross":
+                message = "상대가 " + intensity + " 불쾌한 상태입니다.";
+                break;
+            case "angry":
+                message = "상대가 " + intensity + " 화가 난 상태입니다.";
+                break;
+            case "sad":
+                message = "상대가 " + intensity + " 슬퍼합니다.";
+                break;
+            default:
+                message = "알 수 없는 감정입니다.";
+        }
+
+        return message;
+    }
+
+    private String getIntensity(Double percentage) {
+        if (percentage >= 90) {
+            return "극도로";
+        } else if (percentage >= 75) {
+            return "매우";
+        } else if (percentage >= 60) {
+            return "상당히";
+        } else if (percentage >= 50) {
+            return "조금";
+        } else {
+            return "미미하게";
+        }
+    }
 }
