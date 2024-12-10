@@ -2,6 +2,7 @@ package com.example.taba_project.handler;
 
 import com.example.taba_project.model.Image;
 import com.example.taba_project.repository.ImageRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Transactional
 @Component
 public class ImageWebSocketHandler extends TextWebSocketHandler {
 
@@ -103,9 +105,9 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
             System.out.println("이미지 저장 성공: " + directoryPath + "/" + fileName);
 
             // URL 데이터베이스 저장
-            String fileUrl = directoryPath + "/" + fileName;
+            String fileUrl = fileName;
 
-            // DB에 저장할 Image 객체 생성
+            // DB에 저장할 Image 객체 생성ㄴ
             Image image = new Image();
             image.setUrl(fileUrl);
             imageRepository.save(image); // DB에 저장
