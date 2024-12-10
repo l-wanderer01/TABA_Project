@@ -1,13 +1,9 @@
 package com.example.taba_project.controller;
 
-import com.example.taba_project.handler.FileStorageHandler;
-import com.example.taba_project.model.Image;
-import com.example.taba_project.model.Info;
 import com.example.taba_project.repository.ImageRepository;
+import com.example.taba_project.model.Image;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/image")
