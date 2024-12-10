@@ -1,12 +1,9 @@
 package com.example.taba_project.controller;
 
-import com.example.taba_project.model.Info;
 import com.example.taba_project.repository.InfoRepository;
+import com.example.taba_project.model.Info;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/info")
@@ -15,7 +12,7 @@ public class InfoController {
     @Autowired
     private InfoRepository infoRepository;
 
-    // 새로운 Info 저장
+    // POST 요청으로 새로운 Info 저장 및 텍스트 생성
     @PostMapping
     public String saveInfo(@RequestBody Info info) {
         try {
@@ -39,6 +36,19 @@ public class InfoController {
         }
     }
 
+    // GET 요청으로 ID 기반 Info 데이터 조회 및 메시지 생성
+    @GetMapping("/result")
+    public String getLatestInfo() {
+        Info latestInfo = infoRepository.findFirstByOrderByCreatedAtDesc();
+
+        if (latestInfo == null) {
+            return "데이터가 없습니다.";
+        }
+
+        // 감정 메시지 생성
+        String emotionMessage = generateEmotionMessage(latestInfo.getEmotion(), latestInfo.getPercentage());
+        return emotionMessage;
+    }
 
     private String generateEmotionMessage(String emotion, Double percentage) {
         String message = "";
