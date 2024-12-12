@@ -12,7 +12,12 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class ImageWebSocketHandler extends TextWebSocketHandler {
@@ -21,11 +26,28 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     @Autowired
     private ImageRepository imageRepository;
 
+    // 이미지 저장 dir
+    @Value("${file.storage.directory}")
+    private String directoryPath;
+
     // 세션별 메시지 조합을 위한 맵
     private final ConcurrentHashMap<String, StringBuilder> sessionData = new ConcurrentHashMap<>();
 
-    @Value("${file.storage.directory}")
-    private String directoryPath;
+    // 마지막 수신 시간 기록
+    private Instant lastReceivedTime = Instant.now();
+
+    // 디렉토리 삭제 상태 플래그(디렉토리가 한번 삭제되면 이후에 동작하지 않도록 하기 위함)
+    private boolean isDirectoryDeleted = false;
+
+    // 이미지가 들어오지 않는 시간(3초 이상 디렉토리에 이미지가 들어오지 않으면 해당 디렉토리 내 파일 삭제)
+    private static final long TIMEOUT_SECONDS = 3; // 3초
+
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+    public ImageWebSocketHandler() {
+        // 타이머 스레드 실행
+        scheduler.scheduleAtFixedRate(this::checkAndDeleteFiles, 0, 1, TimeUnit.SECONDS);
+    }
 
     // 마지막 chunk 확인 메서드
     private boolean isLastChunk(String payload) {
@@ -54,6 +76,11 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
             System.out.println("조합된 Base64 데이터: " + base64EncodedData.substring(0, Math.min(base64EncodedData.length(), 100)) + "...");
             // Base64 데이터 디코딩 및 처리
             processBase64Data(base64EncodedData, session);
+
+            // 마지막 수신 시간 업데이트 및 삭제 플래그 초기화
+            lastReceivedTime = Instant.now();
+            // 새로운 이미지가 수신되었으므로 삭제 플래그 초기화
+            isDirectoryDeleted = false;
         }
     }
 
@@ -113,6 +140,49 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
 
         } catch (Exception e) {
             System.err.println("이미지 저장 실패: " + e.getMessage());
+        }
+    }
+
+    // 타이머 기반으로 3초 이상 수신이 없으면 디렉토리 삭제
+    private void checkAndDeleteFiles() {
+        if (lastReceivedTime == null) {
+            return; // 아직 수신된 이미지가 없음
+        }
+
+        // 디렉토리가 이미 삭제된 상태라면 더 이상 삭제하지 않음
+        if (isDirectoryDeleted) {
+            return;
+        }
+
+        long secondsSinceLastReceive = Instant.now().getEpochSecond() - lastReceivedTime.getEpochSecond();
+        if (secondsSinceLastReceive > TIMEOUT_SECONDS) {
+            System.out.println("3초 이상 이미지 수신 없음. 디렉토리 정리 시작...");
+            deleteFilesInDirectory(directoryPath);
+
+            // 삭제 완료 후 플래그 설정
+            isDirectoryDeleted = true;
+        }
+    }
+
+    // 디렉토리 내 모든 파일 삭제
+    private void deleteFilesInDirectory(String directoryPath) {
+        File directory = new File(directoryPath);
+        if (directory.exists() && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        boolean deleted = file.delete();
+                        if (deleted) {
+                            System.out.println("파일 삭제 성공: " + file.getAbsolutePath());
+                        } else {
+                            System.err.println("파일 삭제 실패: " + file.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+        } else {
+            System.err.println("유효하지 않은 디렉토리: " + directoryPath);
         }
     }
 }
