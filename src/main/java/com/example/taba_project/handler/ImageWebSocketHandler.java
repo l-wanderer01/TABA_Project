@@ -10,6 +10,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -38,7 +41,6 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
 
     @Autowired
     public ImageWebSocketHandler(ImageRepository imageRepository, ImageSenderService imageSenderService) {
-
         this.imageRepository = imageRepository;
         this.imageSenderService = imageSenderService;
         // 타이머 스레드 실행: 1초마다 체크
@@ -53,35 +55,33 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
 
-        // 세션별 데이터 조합
-        sessionData.putIfAbsent(session.getId(), new StringBuilder());
-        StringBuilder builder = sessionData.get(session.getId());
-        builder.append(payload);
+        // JSON 메시지 파싱
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(payload);
+            String mode = jsonNode.get("mode").asText(); // 모드 추출
+            String base64Image = jsonNode.get("image").asText(); // 이미지 추출
 
-        if (isLastChunk(payload)) {
-            String base64EncodedData = builder.toString()
-                    .replace("<END>", "")
-                    .replaceAll("\\s", "");
+            System.out.println("모드: " + mode);
+            System.out.println("이미지 데이터 길이: " + base64Image.length());
 
-            sessionData.remove(session.getId());
-
-            System.out.println("조합된 Base64 데이터: " +
-                    base64EncodedData.substring(0, Math.min(base64EncodedData.length(), 100)) + "...");
-
-            processBase64Data(base64EncodedData, session);
+            // 이미지 처리
+            processBase64Data(base64Image, mode);
 
             // 마지막 수신 시간 업데이트
             lastReceivedTime = Instant.now();
             isDirectoryDeleted = false; // 삭제 플래그 초기화
+        } catch (Exception e) {
+            System.err.println("메시지 처리 중 오류: " + e.getMessage());
         }
     }
 
-    private void processBase64Data(String base64EncodedData, WebSocketSession session) {
+    private void processBase64Data(String base64Image, String mode) {
         try {
-            byte[] decodedData = java.util.Base64.getDecoder().decode(base64EncodedData);
+            byte[] decodedData = java.util.Base64.getDecoder().decode(base64Image);
 
             String reEncodedBase64 = java.util.Base64.getEncoder().encodeToString(decodedData);
-            if (!reEncodedBase64.equals(base64EncodedData)) {
+            if (!reEncodedBase64.equals(base64Image)) {
                 System.err.println("Base64 데이터 검증 실패: 디코딩 후 다시 인코딩한 데이터가 일치하지 않습니다.");
                 return;
             }
@@ -98,14 +98,14 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
             }
 
             System.out.println("이미지 유효성 검증 성공.");
-            saveImage(decodedData);
+            saveImage(decodedData, mode);
 
         } catch (Exception e) {
             System.err.println("이미지 처리 중 오류: " + e.getMessage());
         }
     }
 
-    private void saveImage(byte[] imageData) {
+    private void saveImage(byte[] imageData, String mode) {
         try {
             String fileName = "image_" + System.currentTimeMillis() + ".jpg";
             FileStorageHandler FS = new FileStorageHandler();
@@ -120,7 +120,7 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
             System.out.println("이미지 URL 데이터베이스 저장 성공: " + fileUrl);
 
             // ImageSenderService 호출
-            imageSenderService.sendLatestImageToFastApi(); // 호출 추가
+            imageSenderService.sendLatestImageToFastApi(mode); // 모드를 전달하도록 변경
 
         } catch (Exception e) {
             System.err.println("이미지 저장 실패: " + e.getMessage());
