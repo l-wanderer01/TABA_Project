@@ -23,9 +23,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ImageWebSocketHandler extends TextWebSocketHandler {
 
-    @Autowired
-    private ImageRepository imageRepository;
-    private ImageSenderService imageSenderService;
+    private final ImageRepository imageRepository;
+    private final ImageSenderService imageSenderService;
 
     @Value("${file.storage.directory}")
     private String directoryPath;
@@ -37,7 +36,11 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     private static final long TIMEOUT_SECONDS = 3; // 3초
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public ImageWebSocketHandler() {
+    @Autowired
+    public ImageWebSocketHandler(ImageRepository imageRepository, ImageSenderService imageSenderService) {
+
+        this.imageRepository = imageRepository;
+        this.imageSenderService = imageSenderService;
         // 타이머 스레드 실행: 1초마다 체크
         scheduler.scheduleAtFixedRate(this::checkAndDeleteFiles, 0, 1, TimeUnit.SECONDS);
     }
