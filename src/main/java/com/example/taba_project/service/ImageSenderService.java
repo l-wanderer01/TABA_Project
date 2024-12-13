@@ -29,17 +29,17 @@ public class ImageSenderService {
             }
 
             String imagePath = latestImage.getUrl(); // 이미지 경로 가져오기
-
-            // 기존 경로에서 /home/ubuntu/userimage/ 부분을 /app/userimage/로 변경
-            String updatedImagePath = imagePath.replace("/home/ubuntu/userimage/", "root@7986a14454a2:/app/userimage/");
-
-            // 변경된 경로 출력 (디버깅용)
-            System.out.println("변경된 이미지 경로: " + updatedImagePath);
+//
+//            // 기존 경로에서 /home/ubuntu/userimage/ 부분을 /app/userimage/로 변경
+//            String updatedImagePath = imagePath.replace("/home/ubuntu/userimage/", "/app/userimage/");
+//
+//            // 변경된 경로 출력 (디버깅용)
+//            System.out.println("변경된 이미지 경로: " + updatedImagePath);
 
             // 이미지 파일 준비 (변경된 경로 사용)
-            FileSystemResource fileResource = new FileSystemResource(updatedImagePath);
+            FileSystemResource fileResource = new FileSystemResource(imagePath);
             if (!fileResource.exists()) {
-                System.out.println("이미지 파일이 존재하지 않습니다: " + updatedImagePath);
+                System.out.println("이미지 파일이 존재하지 않습니다: " + imagePath);
                 return;
             }
 
