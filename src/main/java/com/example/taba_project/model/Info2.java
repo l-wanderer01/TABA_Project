@@ -15,9 +15,16 @@ public class Info2 {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String object;
+    private Long class_id;
 
-    private String confidence;
+    private Double confidence;
 
-    private String location;
+    private Double x_min;
+
+    private Double y_min;
+
+    private Double x_max;
+
+    private Double y_max;
+
 }
