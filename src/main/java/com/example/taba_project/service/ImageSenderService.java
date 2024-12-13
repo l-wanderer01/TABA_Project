@@ -31,7 +31,7 @@ public class ImageSenderService {
             String imagePath = latestImage.getUrl(); // 이미지 경로 가져오기
 
             // 기존 경로에서 /home/ubuntu/userimage/ 부분을 /app/userimage/로 변경
-            String updatedImagePath = imagePath.replace("/home/ubuntu/userimage/", "/app/userimage/");
+            String updatedImagePath = imagePath.replace("/home/ubuntu/userimage/", "root@7986a14454a2:/app/userimage/");
 
             // 변경된 경로 출력 (디버깅용)
             System.out.println("변경된 이미지 경로: " + updatedImagePath);
