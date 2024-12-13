@@ -3,6 +3,7 @@ package com.example.taba_project.service;
 import com.example.taba_project.model.Image;
 import com.example.taba_project.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;

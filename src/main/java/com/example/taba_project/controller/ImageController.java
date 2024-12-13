@@ -2,6 +2,7 @@ package com.example.taba_project.controller;
 
 import com.example.taba_project.repository.ImageRepository;
 import com.example.taba_project.model.Image;
+import com.example.taba_project.service.ImageSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,9 @@ public class ImageController {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private ImageSenderService imageSenderService;
 
     @PostMapping
     public String saveUrl(@RequestBody Image image) {
@@ -23,5 +27,11 @@ public class ImageController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping("/send")
+    public String sendLatestImage() {
+        imageSenderService.sendLatestImageToFastApi();
+        return "이미지 전송 중...";
     }
 }

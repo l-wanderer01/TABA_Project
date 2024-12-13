@@ -2,6 +2,7 @@ package com.example.taba_project.handler;
 
 import com.example.taba_project.model.Image;
 import com.example.taba_project.repository.ImageRepository;
+import com.example.taba_project.service.ImageSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
 
     @Autowired
     private ImageRepository imageRepository;
+    private ImageSenderService imageSenderService;
 
     @Value("${file.storage.directory}")
     private String directoryPath;
@@ -113,6 +115,9 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
             image.setUrl(fileUrl);
             imageRepository.save(image);
             System.out.println("이미지 URL 데이터베이스 저장 성공: " + fileUrl);
+
+            // ImageSenderService 호출
+            imageSenderService.sendLatestImageToFastApi(); // 호출 추가
 
         } catch (Exception e) {
             System.err.println("이미지 저장 실패: " + e.getMessage());
