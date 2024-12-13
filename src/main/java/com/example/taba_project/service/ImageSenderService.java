@@ -14,7 +14,7 @@ import org.springframework.core.io.FileSystemResource;
 @Service
 public class ImageSenderService {
 
-    private final String fastApiUrl = "http://127.0.0.1:8001/predict/";
+    private final String fastApiUrl = "http://13.125.196.37:8001/predict/";
 
     @Autowired
     private ImageRepository imageRepository;
