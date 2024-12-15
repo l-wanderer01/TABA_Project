@@ -18,6 +18,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,8 +44,8 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     public ImageWebSocketHandler(ImageRepository imageRepository, ImageSenderService imageSenderService) {
         this.imageRepository = imageRepository;
         this.imageSenderService = imageSenderService;
-        // 타이머 스레드 실행: 1초마다 체크
-        scheduler.scheduleAtFixedRate(this::checkAndDeleteFiles, 0, 1, TimeUnit.SECONDS);
+        // 타이머 스레드 실행: 1초마다 체크 및 3초 동안 이미지 송신이 없을 시 디렉토리 및 DB clear
+        // scheduler.scheduleAtFixedRate(this::checkAndDeleteFiles, 0, 1, TimeUnit.SECONDS);
     }
 
     private boolean isLastChunk(String payload) {
@@ -61,6 +62,13 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
             JsonNode jsonNode = objectMapper.readTree(payload);
             String mode = jsonNode.get("mode").asText(); // 모드 추출
             String base64Image = jsonNode.get("image").asText(); // 이미지 추출
+
+            if (Objects.equals(mode, "대화")){
+                mode = "chat";
+            }
+            else if (Objects.equals(mode, "이동")){
+                mode = "move";
+            }
 
             System.out.println("모드: " + mode);
             System.out.println("이미지 데이터 길이: " + base64Image.length());
@@ -127,6 +135,7 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    // 이미지 디렉토리 및 DB 삭제하는 로직
     private void checkAndDeleteFiles() {
         if (lastReceivedTime == null || isDirectoryDeleted) {
             return; // 이미 삭제되었거나 수신된 이미지가 없음
@@ -141,6 +150,7 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    // 이미지 디렉토리 삭제하는 함수
     private void deleteFilesInDirectory(String directoryPath) {
         File directory = new File(directoryPath);
         if (directory.exists() && directory.isDirectory()) {
@@ -162,6 +172,7 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    // DB 삭제하는 함수
     private void deleteDatabase() {
         try {
             imageRepository.deleteAll();

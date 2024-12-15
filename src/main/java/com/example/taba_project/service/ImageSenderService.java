@@ -18,8 +18,8 @@ import org.springframework.core.io.FileSystemResource;
 @Service
 public class ImageSenderService {
 
-    private final String chatModeUrl = "http://13.125.196.37:5001/predict/";
-    private final String moveModeUrl = "http://13.125.196.37:8001/predict/";
+    private final String chatModeUrl = "http://13.125.196.37:5001/predict/"; // AI 모델 ip로 수정 필요
+    private final String moveModeUrl = "http://13.125.196.37:8001/predict/"; // AI 모델 ip로 수정 필요
 
     @Autowired
     private ImageRepository imageRepository;
@@ -36,13 +36,14 @@ public class ImageSenderService {
      */
     public void sendLatestImageToFastApi(String mode) {
         try {
-            // 최신 이미지 가져오기
+            // 최신 이미지 가져옴
             var latestImage = imageRepository.findLatestImage();
             if (latestImage == null) {
                 System.out.println("이미지가 없습니다.");
                 return;
             }
 
+            // 이미지 경로 가져옴
             String imagePath = latestImage.getUrl();
             System.out.println("이미지 경로: " + imagePath);
 
