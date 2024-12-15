@@ -1,11 +1,10 @@
 package com.example.taba_project.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -27,4 +26,11 @@ public class Info2 {
 
     private Double y_max;
 
+    private LocalDateTime createdAt;
+
+    // 생성 시간 자동 설정
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

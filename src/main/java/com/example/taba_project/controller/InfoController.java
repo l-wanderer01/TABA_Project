@@ -37,7 +37,7 @@ public class InfoController {
     }
 
     // GET 요청으로 ID 기반 Info 데이터 조회 및 메시지 생성
-    @GetMapping("/result")
+    @GetMapping("/chat")
     public String getLatestInfo() {
         Info latestInfo = infoRepository.findFirstByOrderByCreatedAtDesc();
 
