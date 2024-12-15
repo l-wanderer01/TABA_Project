@@ -56,31 +56,41 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
 
-        // JSON 메시지 파싱
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            JsonNode jsonNode = objectMapper.readTree(payload);
-            String mode = jsonNode.get("mode").asText(); // 모드 추출
-            String base64Image = jsonNode.get("image").asText(); // 이미지 추출
+        // 세션별 데이터 조합
+        sessionData.putIfAbsent(session.getId(), new StringBuilder());
+        StringBuilder builder = sessionData.get(session.getId());
+        builder.append(payload);
 
-            if (Objects.equals(mode, "대화")){
-                mode = "chat";
+        // 마지막 청크인지 확인
+        if (isLastChunk(payload)) {
+            String completePayload = builder.toString().replace("<END>", "");
+            sessionData.remove(session.getId()); // 완료된 데이터 삭제
+
+            // JSON 메시지 파싱 및 처리
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                JsonNode jsonNode = objectMapper.readTree(completePayload);
+                String mode = jsonNode.get("mode").asText(); // 모드 추출
+                String base64Image = jsonNode.get("image").asText(); // 이미지 추출
+
+                if (Objects.equals(mode, "대화")) {
+                    mode = "chat";
+                } else if (Objects.equals(mode, "이동")) {
+                    mode = "move";
+                }
+
+                System.out.println("모드: " + mode);
+                System.out.println("이미지 데이터 길이: " + base64Image.length());
+
+                // 이미지 처리
+                processBase64Data(base64Image, mode);
+
+                // 마지막 수신 시간 업데이트
+                lastReceivedTime = Instant.now();
+                isDirectoryDeleted = false; // 삭제 플래그 초기화
+            } catch (Exception e) {
+                System.err.println("메시지 처리 중 오류: " + e.getMessage());
             }
-            else if (Objects.equals(mode, "이동")){
-                mode = "move";
-            }
-
-            System.out.println("모드: " + mode);
-            System.out.println("이미지 데이터 길이: " + base64Image.length());
-
-            // 이미지 처리
-            processBase64Data(base64Image, mode);
-
-            // 마지막 수신 시간 업데이트
-            lastReceivedTime = Instant.now();
-            isDirectoryDeleted = false; // 삭제 플래그 초기화
-        } catch (Exception e) {
-            System.err.println("메시지 처리 중 오류: " + e.getMessage());
         }
     }
 
