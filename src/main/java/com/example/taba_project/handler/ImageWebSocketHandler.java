@@ -48,12 +48,8 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
         // scheduler.scheduleAtFixedRate(this::checkAndDeleteFiles, 0, 1, TimeUnit.SECONDS);
     }
 
-    private boolean isLastChunk(String payload) {
-        return payload.endsWith("<END>");
-    }
-
     @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleTextMessage(WebSocketSession session, TextMessage message) {
         String payload = message.getPayload();
 
         // 세션별 데이터 조합
@@ -63,34 +59,44 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
 
         // 마지막 청크인지 확인
         if (isLastChunk(payload)) {
-            String completePayload = builder.toString().replace("<END>", "");
-            sessionData.remove(session.getId()); // 완료된 데이터 삭제
-
-            // JSON 메시지 파싱 및 처리
-            ObjectMapper objectMapper = new ObjectMapper();
             try {
-                JsonNode jsonNode = objectMapper.readTree(completePayload);
-                String mode = jsonNode.get("mode").asText(); // 모드 추출
-                String base64Image = jsonNode.get("image").asText(); // 이미지 추출
+                String completePayload = builder.toString().replace("<END>", "");
+                sessionData.remove(session.getId()); // 데이터 조립 완료 후 삭제
 
-                if (Objects.equals(mode, "대화")) {
-                    mode = "chat";
-                } else if (Objects.equals(mode, "이동")) {
-                    mode = "move";
-                }
-
-                System.out.println("모드: " + mode);
-                System.out.println("이미지 데이터 길이: " + base64Image.length());
-
-                // 이미지 처리
-                processBase64Data(base64Image, mode);
-
-                // 마지막 수신 시간 업데이트
-                lastReceivedTime = Instant.now();
-                isDirectoryDeleted = false; // 삭제 플래그 초기화
+                // JSON 메시지 파싱 및 처리
+                processCompletePayload(completePayload);
+                lastReceivedTime = Instant.now(); // 마지막 수신 시간 업데이트
             } catch (Exception e) {
                 System.err.println("메시지 처리 중 오류: " + e.getMessage());
             }
+        }
+    }
+
+    private boolean isLastChunk(String payload) {
+        return payload.endsWith("<END>");
+    }
+
+    private void processCompletePayload(String payload) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(payload);
+            String mode = jsonNode.get("mode").asText(); // 모드 추출
+            String base64Image = jsonNode.get("data").asText(); // 이미지 추출
+
+            // 모드 정규화
+            if (Objects.equals(mode, "대화")) {
+                mode = "chat";
+            } else if (Objects.equals(mode, "이동")) {
+                mode = "move";
+            }
+
+            System.out.println("모드: " + mode);
+            System.out.println("이미지 데이터 길이: " + base64Image.length());
+
+            // 이미지 처리
+            processBase64Data(base64Image, mode);
+        } catch (Exception e) {
+            System.err.println("JSON 처리 중 오류: " + e.getMessage());
         }
     }
 
@@ -98,26 +104,18 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
         try {
             byte[] decodedData = java.util.Base64.getDecoder().decode(base64Image);
 
-            String reEncodedBase64 = java.util.Base64.getEncoder().encodeToString(decodedData);
-            if (!reEncodedBase64.equals(base64Image)) {
-                System.err.println("Base64 데이터 검증 실패: 디코딩 후 다시 인코딩한 데이터가 일치하지 않습니다.");
-                return;
-            }
-
+            // 데이터 검증
             if (decodedData.length < 2 || decodedData[0] != (byte) 0xFF || decodedData[1] != (byte) 0xD8) {
-                System.err.println("유효하지 않은 JPEG 파일.");
-                return;
+                throw new IllegalArgumentException("유효하지 않은 JPEG 파일.");
             }
 
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(decodedData));
             if (image == null) {
-                System.err.println("이미지 유효성 검증 실패: 유효하지 않은 데이터입니다.");
-                return;
+                throw new IllegalArgumentException("이미지 유효성 검증 실패.");
             }
 
             System.out.println("이미지 유효성 검증 성공.");
             saveImage(decodedData, mode);
-
         } catch (Exception e) {
             System.err.println("이미지 처리 중 오류: " + e.getMessage());
         }
@@ -126,24 +124,34 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     private void saveImage(byte[] imageData, String mode) {
         try {
             String fileName = "image_" + System.currentTimeMillis() + ".jpg";
-            FileStorageHandler FS = new FileStorageHandler();
-            FS.saveFile(directoryPath, fileName, imageData);
-            System.out.println("이미지 저장 성공: " + directoryPath + "/" + fileName);
+            File outputDir = new File(directoryPath);
+            if (!outputDir.exists()) {
+                boolean dirCreated = outputDir.mkdirs();
+                if (!dirCreated) {
+                    throw new IllegalStateException("이미지 저장 디렉토리를 생성할 수 없습니다.");
+                }
+            }
 
-            String fileUrl = directoryPath + "/" + fileName;
+            File outputFile = new File(outputDir, fileName);
+            java.nio.file.Files.write(outputFile.toPath(), imageData);
 
+            System.out.println("이미지 저장 성공: " + outputFile.getAbsolutePath());
+
+            String fileUrl = outputFile.getAbsolutePath();
+
+            // DB에 이미지 URL 저장
             Image image = new Image();
             image.setUrl(fileUrl);
             imageRepository.save(image);
             System.out.println("이미지 URL 데이터베이스 저장 성공: " + fileUrl);
 
-            // ImageSenderService 호출
-            imageSenderService.sendLatestImageToFastApi(mode); // 모드를 전달하도록 변경
-
+            // FastAPI로 이미지 전송
+            imageSenderService.sendLatestImageToFastApi(mode);
         } catch (Exception e) {
             System.err.println("이미지 저장 실패: " + e.getMessage());
         }
     }
+
 
     // 이미지 디렉토리 및 DB 삭제하는 로직
     private void checkAndDeleteFiles() {
