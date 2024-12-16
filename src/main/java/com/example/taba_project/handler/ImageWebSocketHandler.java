@@ -63,12 +63,26 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
                 String completePayload = builder.toString().replace("<END>", "");
                 sessionData.remove(session.getId()); // 데이터 조립 완료 후 삭제
 
-                // JSON 메시지 파싱 및 처리
-                processCompletePayload(completePayload);
-                lastReceivedTime = Instant.now(); // 마지막 수신 시간 업데이트
+                // JSON 유효성 검사 및 처리
+                if (isValidJson(completePayload)) {
+                    processCompletePayload(completePayload);
+                    lastReceivedTime = Instant.now(); // 마지막 수신 시간 업데이트
+                } else {
+                    System.err.println("유효하지 않은 JSON 데이터입니다.");
+                }
             } catch (Exception e) {
                 System.err.println("메시지 처리 중 오류: " + e.getMessage());
             }
+        }
+    }
+
+    private boolean isValidJson(String json) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.readTree(json); // JSON 파싱 시도
+            return true; // 유효한 JSON
+        } catch (Exception e) {
+            return false; // JSON 파싱 실패
         }
     }
 
