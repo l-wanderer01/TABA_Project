@@ -52,16 +52,24 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         String payload = message.getPayload();
 
+        // 디버깅: 수신한 청크 데이터 로그
+        System.out.println("수신한 청크: " + payload);
+
         // 세션별 데이터 조합
         sessionData.putIfAbsent(session.getId(), new StringBuilder());
         StringBuilder builder = sessionData.get(session.getId());
         builder.append(payload);
+
+        // 디버깅: 현재까지 조합된 데이터 로그
+        System.out.println("현재 조합된 데이터: " + builder.toString());
 
         // 마지막 청크인지 확인
         if (isLastChunk(payload)) {
             try {
                 String completePayload = builder.toString().replace("<END>", "");
                 sessionData.remove(session.getId()); // 데이터 조립 완료 후 삭제
+
+                System.out.println("완성된 데이터 : " + completePayload);
 
                 // JSON 유효성 검사 및 처리
                 if (isValidJson(completePayload)) {
@@ -94,6 +102,8 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             JsonNode jsonNode = objectMapper.readTree(payload);
+
+            //JSON 데이터 추출
             String mode = jsonNode.get("mode").asText(); // 모드 추출
             String base64Image = jsonNode.get("data").asText(); // 이미지 추출
 
@@ -107,7 +117,7 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
             System.out.println("모드: " + mode);
             System.out.println("이미지 데이터 길이: " + base64Image.length());
 
-            // 이미지 처리
+            // JSON으로 수신한 이미지 저장 및 mode에 따른 AI 분석 처리
             processBase64Data(base64Image, mode);
         } catch (Exception e) {
             System.err.println("JSON 처리 중 오류: " + e.getMessage());
