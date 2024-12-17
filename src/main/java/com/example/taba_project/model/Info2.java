@@ -26,11 +26,11 @@ public class Info2 {
 
     private Double y_max;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     // 생성 시간 자동 설정
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.created_at = LocalDateTime.now();
     }
 }

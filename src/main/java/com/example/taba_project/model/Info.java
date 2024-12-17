@@ -22,11 +22,11 @@ public class Info {
 
     private Double percentage;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     // 생성 시간 자동 설정
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.created_at = LocalDateTime.now();
     }
 }

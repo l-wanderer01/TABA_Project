@@ -92,7 +92,7 @@ public class ImageSenderService {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response);
 
-            if (mode.equalsIgnoreCase("대화")) {
+            if (mode.equalsIgnoreCase("chat")) {
                 // Info 테이블에 저장
                 Info info = new Info();
                 info.setAge(jsonNode.get("age").asInt());
@@ -103,7 +103,7 @@ public class ImageSenderService {
 
                 System.out.println("Info 데이터 저장 성공: " + info);
 
-            } else if (mode.equalsIgnoreCase("이동")) {
+            } else if (mode.equalsIgnoreCase("move")) {
                 // Info2 테이블에 저장
                 Info2 info2 = new Info2();
                 info2.setClass_id(jsonNode.get("class_id").asLong());
