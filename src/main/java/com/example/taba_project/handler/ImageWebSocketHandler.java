@@ -35,7 +35,7 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     @Value("${file.storage.directory}")
     private String directoryPath;
 
-    private final ConcurrentHashMap<String, StringBuilder> sessionData = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ChunkedMessage> sessionChunks = new ConcurrentHashMap<>();
     private static final long TIMEOUT_SECONDS = 3; // 3초
     private Instant lastReceivedTime = Instant.now();
     private boolean isDirectoryDeleted = false;
@@ -56,106 +56,112 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
-        String payload = message.getPayload();
-
-        // 로그 추가: 클라이언트가 메시지 전송을 시작했음을 기록
-        logger.info("클라이언트 [{}]가 메시지를 전송하기 시작했습니다. 메시지 크기: {} bytes",
-                session.getId(), payload.length());
-
-        logger.info("수신한 청크 데이터: {}", payload);
-
-        // 세션별 데이터 조합
-        sessionData.putIfAbsent(session.getId(), new StringBuilder());
-        StringBuilder builder = sessionData.get(session.getId());
-        builder.append(payload);
-
-        // 마지막 청크인지 확인
-        if (isLastChunk(payload)) {
-            try {
-                String completePayload = builder.toString().replace("<END>", "");
-                sessionData.remove(session.getId()); // 데이터 조합 완료 후 삭제
-
-                logger.info("완성된 데이터: {}", completePayload);
-
-                // JSON 유효성 검사 및 처리
-                if (isValidJson(completePayload)) {
-                    processCompletePayload(completePayload);
-                    lastReceivedTime = Instant.now(); // 마지막 수신 시간 업데이트
-                    isDirectoryDeleted = false; // 디렉토리 삭제 상태 초기화
-                } else {
-                    logger.error("유효하지 않은 JSON 데이터");
-                }
-            } catch (Exception e) {
-                logger.error("메시지 처리 중 오류: {}", e.getMessage());
-            }
-        }
-    }
-
-    private boolean isValidJson(String json) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.readTree(json); // JSON 파싱 시도
-            return true; // 유효한 JSON
-        } catch (Exception e) {
-            return false; // JSON 파싱 실패
-        }
-    }
+            String payload = message.getPayload();
+            logger.info("수신한 데이터: {}", payload);
 
-    private boolean isLastChunk(String payload) {
-        return payload.endsWith("<END>");
-    }
+            JsonNode jsonNode = new ObjectMapper().readTree(payload);
 
-    private void processCompletePayload(String payload) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            JsonNode jsonNode = objectMapper.readTree(payload);
+            String sessionId = session.getId();
+            int sequence = jsonNode.get("sequence").asInt();
+            int chunk = jsonNode.get("chunk").asInt();
+            int totalChunks = jsonNode.get("totalChunks").asInt();
+            String data = jsonNode.get("data").asText();
+            boolean isLast = jsonNode.get("isLast").asBoolean();
 
-            // JSON 데이터 추출
-            String mode = jsonNode.get("mode").asText(); // 모드 추출
-            String base64Image = jsonNode.get("data").asText(); // 이미지 추출
+            // 청크 데이터 조합
+            sessionChunks.putIfAbsent(sessionId, new ChunkedMessage(sequence, totalChunks));
+            ChunkedMessage chunkedMessage = sessionChunks.get(sessionId);
+            chunkedMessage.addChunk(chunk, data);
 
-            // 모드 정규화
-            if ("대화".equals(mode)) {
-                mode = "chat";
-            } else if ("이동".equals(mode)) {
-                mode = "move";
+            // 마지막 청크인 경우
+            if (isLast) {
+                logger.info("마지막 청크 수신 완료. 데이터 조합 중...");
+                String completeBase64 = chunkedMessage.combineChunks();
+                String mode = jsonNode.get("mode").asText();
+
+                // 모드 정규화
+                mode = normalizeMode(mode);
+
+                processBase64Data(completeBase64, mode);
+                sessionChunks.remove(sessionId); // 조합 완료 후 청크 삭제
             }
-
-            logger.info("모드: {}", mode);
-            logger.info("이미지 데이터 길이: {}", base64Image.length());
-
-            // JSON으로 수신한 이미지 저장 및 mode에 따른 AI 분석 처리
-            processBase64Data(base64Image, mode);
         } catch (Exception e) {
-            logger.error("JSON 처리 중 오류: {}", e.getMessage());
+            logger.error("메시지 처리 중 오류 발생: {}", e.getMessage());
         }
+    }
+
+    private String normalizeMode(String mode) {
+        if ("대화".equals(mode)) return "chat";
+        if ("이동".equals(mode)) return "move";
+        return mode;
     }
 
     private void processBase64Data(String base64Image, String mode) {
         try {
             byte[] decodedData = java.util.Base64.getDecoder().decode(base64Image);
 
-            // 데이터 검증
+            // 이미지 데이터 검증
             if (decodedData.length < 2 || decodedData[0] != (byte) 0xFF || decodedData[1] != (byte) 0xD8) {
                 throw new IllegalArgumentException("유효하지 않은 JPEG 파일.");
             }
 
-            // 저장된 파일 경로 얻기
+            // 이미지 저장
             String fileName = "image_" + System.currentTimeMillis() + ".jpg";
             String savedFilePath = fileStorageHandler.saveFile(directoryPath, fileName, decodedData);
-
             logger.info("이미지 저장 성공: {}", savedFilePath);
 
             // DB 저장
             saveImageRecord(savedFilePath);
 
-            // FastAPI로 이미지 전송
+            // FastAPI로 전송
             imageSenderService.sendLatestImageToFastApi(mode);
 
         } catch (IllegalArgumentException e) {
             logger.error("이미지 데이터 검증 실패: {}", e.getMessage());
         } catch (IOException e) {
             logger.error("이미지 저장 중 오류: {}", e.getMessage());
+        }
+    }
+
+    private void processCompleteData(String base64Image, String mode) {
+        try {
+            byte[] decodedImage = java.util.Base64.getDecoder().decode(base64Image);
+            logger.info("데이터 크기: {} bytes, 모드: {}", decodedImage.length, mode);
+
+            // 여기서 이미지 저장 및 모드에 따른 추가 작업 수행
+            // 예: 이미지 파일 저장, 데이터베이스 저장 등
+        } catch (Exception e) {
+            logger.error("이미지 처리 중 오류: {}", e.getMessage());
+        }
+    }
+
+    // 청크 데이터를 조합하는 내부 클래스
+    private static class ChunkedMessage {
+        private final int sequence;
+        private final int totalChunks;
+        private final String[] chunks;
+
+        public ChunkedMessage(int sequence, int totalChunks) {
+            this.sequence = sequence;
+            this.totalChunks = totalChunks;
+            this.chunks = new String[totalChunks];
+        }
+
+        public void addChunk(int chunkNumber, String data) {
+            if (chunkNumber > 0 && chunkNumber <= totalChunks) {
+                chunks[chunkNumber - 1] = data;
+            }
+        }
+
+        public String combineChunks() {
+            StringBuilder combinedData = new StringBuilder();
+            for (String chunk : chunks) {
+                if (chunk != null) {
+                    combinedData.append(chunk);
+                }
+            }
+            return combinedData.toString();
         }
     }
 
