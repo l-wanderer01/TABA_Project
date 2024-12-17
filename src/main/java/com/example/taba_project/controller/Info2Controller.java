@@ -66,13 +66,13 @@ public class Info2Controller {
 
     private String getDistanceDescription(double averageDistance) {
         if (averageDistance < 25.0) {
-            return "매우 가까운";
-        } else if (averageDistance < 50.0) {
-            return "가까운";
-        } else if (averageDistance < 100.0) {
-            return "중간 거리의";
-        } else {
             return "먼";
+        } else if (averageDistance < 50.0) {
+            return "중간 거리의";
+        } else if (averageDistance < 100.0) {
+            return "가까운";
+        } else {
+            return "매우 가까운";
         }
     }
 }
