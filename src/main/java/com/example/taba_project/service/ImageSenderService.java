@@ -95,26 +95,66 @@ public class ImageSenderService {
             if (mode.equalsIgnoreCase("chat")) {
                 // Info 테이블에 저장
                 Info info = new Info();
-                info.setAge(jsonNode.get("age").asInt());
-                info.setEmotion(jsonNode.get("emotion").asText());
-                info.setGender(jsonNode.get("gender").asText());
-                info.setPercentage(jsonNode.get("percentage").asDouble());
-                infoRepository.save(info);
 
+                // 각 필드를 안전하게 파싱
+                if (jsonNode.has("age") && !jsonNode.get("age").isNull()) {
+                    info.setAge(jsonNode.get("age").asInt());
+                }
+
+                if (jsonNode.has("emotion") && !jsonNode.get("emotion").isNull()) {
+                    info.setEmotion(jsonNode.get("emotion").asText());
+                }
+
+                if (jsonNode.has("gender") && !jsonNode.get("gender").isNull()) {
+                    info.setGender(jsonNode.get("gender").asText());
+                }
+
+                if (jsonNode.has("percentage") && !jsonNode.get("percentage").isNull()) {
+                    info.setPercentage(jsonNode.get("percentage").asDouble());
+                }
+
+                // 데이터베이스에 저장
+                infoRepository.save(info);
                 System.out.println("Info 데이터 저장 성공: " + info);
 
             } else if (mode.equalsIgnoreCase("move")) {
                 // Info2 테이블에 저장
                 Info2 info2 = new Info2();
-                info2.setClass_id(jsonNode.get("class_id").asLong());
-                info2.setConfidence(jsonNode.get("confidence").asDouble());
-                info2.setX_min(jsonNode.get("x_min").asDouble());
-                info2.setY_min(jsonNode.get("y_min").asDouble());
-                info2.setX_max(jsonNode.get("x_max").asDouble());
-                info2.setY_max(jsonNode.get("y_max").asDouble());
-                info2Repository.save(info2);
+                // FastAPI 응답에서 detections 배열의 첫 번째 요소에 접근
+                if (jsonNode.has("detections") && jsonNode.get("detections").isArray()) {
+                    JsonNode detectionNode = jsonNode.get("detections").get(0); // 첫 번째 요소
 
-                System.out.println("Info2 데이터 저장 성공: " + info2);
+                    // 각 필드를 안전하게 파싱
+                    if (detectionNode.has("class_id")) {
+                        info2.setClass_id(detectionNode.get("class_id").asLong());
+                    }
+
+                    if (detectionNode.has("confidence")) {
+                        info2.setConfidence(detectionNode.get("confidence").asDouble());
+                    }
+
+                    if (detectionNode.has("x_min")) {
+                        info2.setX_min(detectionNode.get("x_min").asDouble());
+                    }
+
+                    if (detectionNode.has("y_min")) {
+                        info2.setY_min(detectionNode.get("y_min").asDouble());
+                    }
+
+                    if (detectionNode.has("x_max")) {
+                        info2.setX_max(detectionNode.get("x_max").asDouble());
+                    }
+
+                    if (detectionNode.has("y_max")) {
+                        info2.setY_max(detectionNode.get("y_max").asDouble());
+                    }
+
+                    // 데이터베이스에 저장
+                    info2Repository.save(info2);
+                    System.out.println("Info2 데이터 저장 성공: " + info2);
+                } else {
+                    System.err.println("detections 배열이 존재하지 않거나 비어있습니다.");
+                }
             }
 
         } catch (Exception e) {
