@@ -61,10 +61,10 @@ public class InfoController {
             case "surprise":
                 message = "상대가 " + intensity + " 놀랐습니다.";
                 break;
-            case "무표정":
+            case "neutral":
                 message = "상대가 " + intensity + " 무표정입니다.";
                 break;
-            case "gross":
+            case "disgust":
                 message = "상대가 " + intensity + " 불쾌한 상태입니다.";
                 break;
             case "angry":
@@ -73,6 +73,8 @@ public class InfoController {
             case "sad":
                 message = "상대가 " + intensity + " 슬퍼합니다.";
                 break;
+            case "fear":
+                message = "상대가 " + intensity + "무서워 합니다.";
             default:
                 message = "알 수 없는 감정입니다.";
         }
