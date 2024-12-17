@@ -101,6 +101,8 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
         try {
             byte[] decodedData = java.util.Base64.getDecoder().decode(base64Image);
 
+            logger.info("디코딩된 이미지 크기: {} bytes", decodedData.length);
+
             // 이미지 데이터 검증
             if (decodedData.length < 2 || decodedData[0] != (byte) 0xFF || decodedData[1] != (byte) 0xD8) {
                 throw new IllegalArgumentException("유효하지 않은 JPEG 파일.");
@@ -156,13 +158,17 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
 
         public String combineChunks() {
             StringBuilder combinedData = new StringBuilder();
-            for (String chunk : chunks) {
-                if (chunk != null) {
-                    combinedData.append(chunk);
+            for (int i = 0; i < chunks.length; i++) {
+                if (chunks[i] != null) {
+                    logger.info("청크 [{}] : {}", i + 1, chunks[i].length());
+                    combinedData.append(chunks[i]);
+                } else {
+                    logger.error("청크 [{}] 누락됨", i + 1);
                 }
             }
             return combinedData.toString();
         }
+
     }
 
     private void saveImageRecord(String filePath) {
