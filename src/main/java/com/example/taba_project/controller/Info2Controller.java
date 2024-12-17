@@ -48,7 +48,7 @@ public class Info2Controller {
         String message;
         double confidence = info2.getConfidence();
 
-        if (confidence < 50.0) {
+        if (confidence < 10.0) {
             message = "위험한 물체가 없습니다.";
         } else {
             // 객체 타입 확인
