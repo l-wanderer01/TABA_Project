@@ -58,6 +58,10 @@ public class ImageWebSocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         String payload = message.getPayload();
 
+        // 로그 추가: 클라이언트가 메시지 전송을 시작했음을 기록
+        logger.info("클라이언트 [{}]가 메시지를 전송하기 시작했습니다. 메시지 크기: {} bytes",
+                session.getId(), payload.length());
+
         logger.info("수신한 청크 데이터: {}", payload);
 
         // 세션별 데이터 조합
