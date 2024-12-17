@@ -96,26 +96,33 @@ public class ImageSenderService {
                 // Info 테이블에 저장
                 Info info = new Info();
 
-                // 각 필드를 안전하게 파싱
-                if (jsonNode.has("age") && !jsonNode.get("age").isNull()) {
-                    info.setAge(jsonNode.get("age").asInt());
-                }
+                // detections 배열의 첫 번째 요소에 접근
+                if (jsonNode.has("detections") && jsonNode.get("detections").isArray()) {
+                    JsonNode detectionNode = jsonNode.get("detections").get(0); // 첫 번째 요소
 
-                if (jsonNode.has("emotion") && !jsonNode.get("emotion").isNull()) {
-                    info.setEmotion(jsonNode.get("emotion").asText());
-                }
+                    // 각 필드를 안전하게 파싱
+                    if (detectionNode.has("age") && !detectionNode.get("age").isNull()) {
+                        info.setAge(detectionNode.get("age").asInt());
+                    }
 
-                if (jsonNode.has("gender") && !jsonNode.get("gender").isNull()) {
-                    info.setGender(jsonNode.get("gender").asText());
-                }
+                    if (detectionNode.has("emotion") && !detectionNode.get("emotion").isNull()) {
+                        info.setEmotion(detectionNode.get("emotion").asText());
+                    }
 
-                if (jsonNode.has("percentage") && !jsonNode.get("percentage").isNull()) {
-                    info.setPercentage(jsonNode.get("percentage").asDouble());
-                }
+                    if (detectionNode.has("gender") && !detectionNode.get("gender").isNull()) {
+                        info.setGender(detectionNode.get("gender").asText());
+                    }
 
-                // 데이터베이스에 저장
-                infoRepository.save(info);
-                System.out.println("Info 데이터 저장 성공: " + info);
+                    if (detectionNode.has("emotion_confidence") && !detectionNode.get("emotion_confidence").isNull()) {
+                        info.setPercentage(detectionNode.get("emotion_confidence").asDouble());
+                    }
+
+                    // 데이터베이스에 저장
+                    infoRepository.save(info);
+                    System.out.println("Info 데이터 저장 성공: " + info);
+                } else {
+                    System.err.println("detections 배열이 존재하지 않거나 비어있습니다.");
+                }
 
             } else if (mode.equalsIgnoreCase("move")) {
                 // Info2 테이블에 저장
