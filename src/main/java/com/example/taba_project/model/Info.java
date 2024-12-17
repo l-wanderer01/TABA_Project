@@ -1,5 +1,6 @@
 package com.example.taba_project.model;
 
+import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -22,6 +23,8 @@ public class Info {
 
     private Double percentage;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     // 생성 시간 자동 설정

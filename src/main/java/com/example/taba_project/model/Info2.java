@@ -3,6 +3,7 @@ package com.example.taba_project.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +27,8 @@ public class Info2 {
 
     private Double y_max;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     // 생성 시간 자동 설정
