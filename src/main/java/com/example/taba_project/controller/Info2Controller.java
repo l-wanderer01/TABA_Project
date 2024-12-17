@@ -55,7 +55,7 @@ public class Info2Controller {
             String objectType = info2.getClass_id() == 0 ? "사람" : "사물";
 
             // 거리 계산
-            double averageDistance = (info2.getX_max() - info2.getX_min() + info2.getY_max() - info2.getY_min()) / 2.0;
+            double averageDistance = Math.abs((info2.getX_max() - info2.getX_min() + info2.getY_max() - info2.getY_min()) / 2.0);
             String distanceDescription = getDistanceDescription(averageDistance);
 
             message = String.format("감지된 객체는 %s이며, %s 위치에 있습니다.", objectType, distanceDescription);
@@ -65,11 +65,11 @@ public class Info2Controller {
     }
 
     private String getDistanceDescription(double averageDistance) {
-        if (averageDistance < 10.0) {
+        if (averageDistance < 25.0) {
             return "매우 가까운";
-        } else if (averageDistance < 25.0) {
+        } else if (averageDistance < 50.0) {
             return "가까운";
-        } else if (averageDistance < 40.0) {
+        } else if (averageDistance < 100.0) {
             return "중간 거리의";
         } else {
             return "먼";
