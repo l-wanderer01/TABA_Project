@@ -48,7 +48,7 @@ public class Info2Controller {
         String message;
         double confidence = info2.getConfidence();
 
-        if (confidence < 10.0) {
+        if (confidence < 0.3) {
             message = "위험한 물체가 없습니다.";
         } else {
             // 객체 타입 확인
@@ -65,11 +65,11 @@ public class Info2Controller {
     }
 
     private String getDistanceDescription(double averageDistance) {
-        if (averageDistance < 50.0) {
+        if (averageDistance < 25.0) {
             return "매우 가까운";
-        } else if (averageDistance < 150.0) {
+        } else if (averageDistance < 50.0) {
             return "가까운";
-        } else if (averageDistance < 300.0) {
+        } else if (averageDistance < 100.0) {
             return "중간 거리의";
         } else {
             return "먼";
