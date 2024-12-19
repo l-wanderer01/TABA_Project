@@ -104,7 +104,7 @@ public class InfoController {
                 message = age + "대 " + gender +  "알 수 없는 감정입니다.";
         }
 
-        return "20대 남자가 행복해 합니다";
+        return message;
     }
 
     private String getIntensity(Double percentage) {
