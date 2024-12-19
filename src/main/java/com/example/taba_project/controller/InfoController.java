@@ -54,36 +54,57 @@ public class InfoController {
         String message = "";
         String intensity = getIntensity(percentage);
         if(gender.equals("Man")){
-            gender = "남자";
+             gender = "남자";
         }else{
             gender = "여자";
         }
 
-        switch (emotion.toLowerCase()) {
-            case "happy":
-                message = String.format("%d살 %s인 상대가 %s 행복해 합니다.", age, gender, intensity);
-                break;
-            case "surprise":
-                message = String.format("%d살 %s인 상대가 %s 놀랐습니다.", age, gender, intensity);
-                break;
-            case "neutral":
-                message = String.format("%d살 %s인 상대가 %s 무표정합니다.", age, gender, intensity);
-                break;
-            case "disgust":
-                message = String.format("%d살 %s인 상대가 %s 불쾌한 상태입니다." age, gender, intensity);
-                break;
-            case "angry":
-                message = String.format("%d살 %s인 상대가 %s 화가 난 상태입니다.", age, gender, intensity);
-                break;
-            case "sad":
-                message = String.format("%d살 %s인 상대가 %s 슬퍼합니다.", age, gender, intensity);
-                break;
-            default:
-                // message = age + "살" + gender +  "알 수 없는 감정입니다.";
-                message = String.format("%d살 %s인 상대의 감정을 파악하기 어렵습니다.", age, gender);
+        if(age<20){
+            age = 10;
+        } else if (age<30) {
+            age = 20;
+        }else if (age<40) {
+            age = 30;
+        }else if (age<50) {
+            age = 40;
+        }else if (age<60) {
+            age = 50;
+        }else if (age<70) {
+            age = 60;
+        }else if (age<80) {
+            age = 70;
+        }else if (age<90) {
+            age = 80;
+        }else if (age<100) {
+            age = 90;
+        }else{
+            age = 100;
         }
 
-        return message;
+        switch (emotion.toLowerCase()) {
+            case "happy":
+                message = age + "대 " + gender + "가 " + intensity + " 행복해 합니다.";
+                break;
+            case "surprise":
+                message = age + "대 " + gender + "가 " + intensity + " 놀랐습니다.";
+                break;
+            case "neutral":
+                message = age + "대 " + gender +"가 " + intensity + " 무표정입니다.";
+                break;
+            case "disgust":
+                message = age + "대 " + gender + "가 " + intensity + " 불쾌한 상태입니다.";
+                break;
+            case "angry":
+                message = age + "대 " + gender + "가 " + intensity + " 화가 난 상태입니다.";
+                break;
+            case "sad":
+                message = age + "대 " + gender + "가 " + intensity + " 슬퍼합니다.";
+                break;
+            default:
+                message = age + "대 " + gender +  "알 수 없는 감정입니다.";
+        }
+
+        return "20대 남자가 행복해 합니다";
     }
 
     private String getIntensity(Double percentage) {
