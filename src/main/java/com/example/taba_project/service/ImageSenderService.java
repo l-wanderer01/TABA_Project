@@ -18,8 +18,8 @@ import org.springframework.core.io.FileSystemResource;
 @Service
 public class ImageSenderService {
 
-    private final String chatModeUrl = "http://3.38.206.234:5001/predict/"; // AI 모델 ip로 수정 필요
-    private final String moveModeUrl = "http://3.38.206.234:8001/predict/"; // AI 모델 ip로 수정 필요
+    private final String chatModeUrl = "http://43.203.174.89:5001/predict/"; // AI 모델 ip로 수정 필요
+    private final String moveModeUrl = "http://43.203.174.89:8001/predict/"; // AI 모델 ip로 수정 필요
 
     @Autowired
     private ImageRepository imageRepository;
