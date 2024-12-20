@@ -2,10 +2,12 @@
 
 Front End
   - Flutter
+    
 Back End
   - Spring Boot
   - MySQL
   - Nginx
+
 AI
   - Docker
   - FastAPI
