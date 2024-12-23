@@ -30,8 +30,11 @@ public class ImageController {
     }
 
     @GetMapping("/send")
-    public String sendLatestImage() {
-        imageSenderService.sendLatestImageToFastApi();
-        return "이미지 전송 중...";
+    public String sendLatestImage(@RequestParam("mode") String mode) {
+        if (!mode.equalsIgnoreCase("move") && !mode.equalsIgnoreCase("chat")) {
+            return "유효하지 않은 모드입니다. 'move' 또는 'chat' 중 하나를 선택하세요.";
+        }
+        imageSenderService.sendLatestImageToFastApi(mode);
+        return "이미지 전송 중... 모드: " + mode;
     }
 }

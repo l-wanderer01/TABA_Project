@@ -22,7 +22,7 @@ public class InfoController {
             infoRepository.save(info);
 
             // 감정 메시지 생성
-            String emotionMessage = generateEmotionMessage(info.getEmotion(), info.getPercentage());
+            String emotionMessage = generateEmotionMessage(info.getEmotion(), info.getPercentage(), info.getAge(), info.getGender());
 
             // 로그에 출력
             System.out.println("Generated emotion message: " + emotionMessage);
@@ -37,7 +37,7 @@ public class InfoController {
     }
 
     // GET 요청으로 ID 기반 Info 데이터 조회 및 메시지 생성
-    @GetMapping("/result")
+    @GetMapping("/chat")
     public String getLatestInfo() {
         Info latestInfo = infoRepository.findFirstByOrderByCreatedAtDesc();
 
@@ -46,35 +46,41 @@ public class InfoController {
         }
 
         // 감정 메시지 생성
-        String emotionMessage = generateEmotionMessage(latestInfo.getEmotion(), latestInfo.getPercentage());
+        String emotionMessage = generateEmotionMessage(latestInfo.getEmotion(), latestInfo.getPercentage(), latestInfo.getAge(), latestInfo.getGender());
         return emotionMessage;
     }
 
-    private String generateEmotionMessage(String emotion, Double percentage) {
+    private String generateEmotionMessage(String emotion, Double percentage, Integer age, String gender ) {
         String message = "";
         String intensity = getIntensity(percentage);
+        if(gender.equals("Man")){
+            gender = "남자";
+        }else{
+            gender = "여자";
+        }
 
         switch (emotion.toLowerCase()) {
             case "happy":
-                message = "상대가 " + intensity + " 행복해 합니다.";
+                message = String.format("%d살 %s인 상대가 %s 행복해 합니다.", age, gender, intensity);
                 break;
             case "surprise":
-                message = "상대가 " + intensity + " 놀랐습니다.";
+                message = String.format("%d살 %s인 상대가 %s 놀랐습니다.", age, gender, intensity);
                 break;
-            case "무표정":
-                message = "상대가 " + intensity + " 무표정입니다.";
+            case "neutral":
+                message = String.format("%d살 %s인 상대가 %s 무표정합니다.", age, gender, intensity);
                 break;
-            case "gross":
-                message = "상대가 " + intensity + " 불쾌한 상태입니다.";
+            case "disgust":
+                message = String.format("%d살 %s인 상대가 %s 불쾌한 상태입니다." age, gender, intensity);
                 break;
             case "angry":
-                message = "상대가 " + intensity + " 화가 난 상태입니다.";
+                message = String.format("%d살 %s인 상대가 %s 화가 난 상태입니다.", age, gender, intensity);
                 break;
             case "sad":
-                message = "상대가 " + intensity + " 슬퍼합니다.";
+                message = String.format("%d살 %s인 상대가 %s 슬퍼합니다.", age, gender, intensity);
                 break;
             default:
-                message = "알 수 없는 감정입니다.";
+                // message = age + "살" + gender +  "알 수 없는 감정입니다.";
+                message = String.format("%d살 %s인 상대의 감정을 파악하기 어렵습니다.", age, gender);
         }
 
         return message;
