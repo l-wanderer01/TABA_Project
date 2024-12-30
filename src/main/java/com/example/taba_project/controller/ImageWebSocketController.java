@@ -1,30 +1,3 @@
-//package com.example.demo.controller;
-//
-//import com.example.demo.model.ImageData;
-//import com.example.demo.service.ImageProcessingService;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.messaging.handler.annotation.MessageMapping;
-//import org.springframework.messaging.handler.annotation.Payload;
-//import org.springframework.stereotype.Controller;
-//
-//@Controller
-//@RequiredArgsConstructor
-//public class ImageWebSocketController {
-//
-//    private final ImageProcessingService imageProcessingService;
-//
-//    @MessageMapping("/upload")
-//    public void handleImageUpload(@Payload ImageData imageData) {
-//        try {
-//            // 서비스 계층으로 이미지 데이터 전달 및 저장
-//            String savedPath = imageProcessingService.saveImage(imageData);
-//            System.out.println("이미지 저장 경로: " + savedPath);
-//        } catch (Exception e) {
-//            System.err.println("이미지 처리 중 오류: " + e.getMessage());
-//        }
-//    }
-//}
-
 package com.example.taba_project.controller;
 
 import com.example.taba_project.model.ImageData;
