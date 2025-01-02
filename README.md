@@ -90,11 +90,11 @@ https://theindigo.co.kr/archives/11540
   - Flutter
     
 <h2>Back End</h2>
-  - Spring Boot
-  - MySQL
-  - Nginx
+  - Spring Boot 
+  - MySQL 
+  - Nginx 
 
 <h2>AI</h2>
-  - Docker
-  - FastAPI
-  - Google Colab
+  - Docker 
+  - FastAPI 
+  - Google Colab 
