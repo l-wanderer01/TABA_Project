@@ -90,11 +90,11 @@ https://theindigo.co.kr/archives/11540
 1. Flutter
     
 <h2>Back End</h2>
-1. Spring Boot 
-2. MySQL 
-3. Nginx 
+1. Spring Boot<br>
+2. MySQL<br>
+3. Nginx<br>
 
 <h2>AI</h2>
-1. Docker 
-2. FastAPI 
-3. Google Colab 
+1. Docker<br>
+2. FastAPI<br>
+3. Google Colab<br> 
