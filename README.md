@@ -87,14 +87,14 @@ https://theindigo.co.kr/archives/11540
 
 
 <h2>Front End</h2>
-  - Flutter
+1. Flutter
     
 <h2>Back End</h2>
-  - Spring Boot 
-  - MySQL 
-  - Nginx 
+1. Spring Boot 
+2. MySQL 
+3. Nginx 
 
 <h2>AI</h2>
-  - Docker 
-  - FastAPI 
-  - Google Colab 
+1. Docker 
+2. FastAPI 
+3. Google Colab 
