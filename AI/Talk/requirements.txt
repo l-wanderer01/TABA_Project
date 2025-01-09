@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+deepface
+opencv-python-headless
+pillow
+python-multipart
+numpy
+tensorflow
+tf-keras
+torch
+torchvision
+ultralytics
+mediapipe

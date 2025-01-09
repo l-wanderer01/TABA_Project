@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  move_mode:
+    build:
+      context: ./Move
+      dockerfile: Dockerfile
+    image: byeongchan0421/taba_five_ai-move_mode:latest
+    container_name: move_mode_container
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./Move:/app
+      - ./Move/models:/app/models  
+    environment:
+      - MODEL_PATH=/app/models/yolo11n.pt
+
+  conversation_mode:
+    build:
+      context: ./Talk
+      dockerfile: Dockerfile
+    image: byeongchan0421/taba_five_ai-conversation_mode:latest
+    container_name: conversation_mode_container
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./Talk:/app
+    environment:
+      - MODEL_PATH=/app/models
